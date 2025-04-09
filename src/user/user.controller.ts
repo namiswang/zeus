@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, Post, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, HttpException, Inject, Post } from '@nestjs/common';
 import { UserService } from './user.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -12,26 +12,24 @@ export class UserController {
   private readonly jwtService: JwtService;
 
   @Post('login')
-  async login(@Body(ValidationPipe) user: LoginDto) {
-    const foundUser = await this.userService.login(user);
-    if (foundUser) {
-      const token = await this.jwtService.signAsync({
-        user: {
-          id: 'id' in foundUser ? foundUser.id : '',
-          username: 'username' in foundUser ? foundUser.username : '',
-        },
-      });
-      return {
-        token,
-        username: 'username' in foundUser ? foundUser.username : '',
-      };
-    } else {
-      return '登录失败';
+  async login(@Body() user: LoginDto) {
+    const vo = await this.userService.login(user);
+
+    if (vo instanceof HttpException) {
+      throw vo;
     }
+
+    vo.accessToken = this.jwtService.sign({
+      user: {
+        id: vo.userInfo.id,
+        username: vo.userInfo.username,
+      },
+    });
+    return vo;
   }
 
   @Post('register')
-  async register(@Body(ValidationPipe) user: RegisterDto) {
+  async register(@Body() user: RegisterDto) {
     return await this.userService.register(user);
   }
 }

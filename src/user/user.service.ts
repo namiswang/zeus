@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import * as crypto from 'node:crypto';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { LoginVo } from './vo/login.vo';
 
 function md5(str: string) {
   const hash = crypto.createHash('md5');
@@ -46,7 +47,6 @@ export class UserService {
     const foundUser = await this.userRepository.findOneBy({
       username: user.username,
     });
-
     if (!foundUser) {
       return new HttpException('用户名不存在', 200);
     }
@@ -54,6 +54,13 @@ export class UserService {
       return new HttpException('密码错误', 200);
     }
 
-    return foundUser;
+    const vo = new LoginVo();
+
+    vo.userInfo = {
+      id: foundUser.id,
+      username: foundUser.username,
+    };
+
+    return vo;
   }
 }
