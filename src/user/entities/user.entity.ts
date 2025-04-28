@@ -2,9 +2,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Ledger } from '@/ledger/entities/ledger.entity';
 
 @Entity()
 export class User {
@@ -23,9 +25,23 @@ export class User {
   })
   password: string;
 
+  @Column({
+    comment: '头像',
+  })
+  avatar: string;
+
+  @OneToMany(() => Ledger, (ledger) => ledger.owner)
+  ledgers: Ledger[];
+
   @CreateDateColumn()
   createTime: Date;
 
   @UpdateDateColumn()
   updateTime: Date;
+
+  @Column({
+    default: 0,
+    comment: '是否删除',
+  })
+  isDelete: number;
 }

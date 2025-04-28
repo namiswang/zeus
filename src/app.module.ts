@@ -5,7 +5,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { User } from './user/entities/user.entity';
 import { JwtModule } from '@nestjs/jwt';
+import { LedgerModule } from './ledger/ledger.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Ledger } from './ledger/entities/ledger.entity';
 
 @Module({
   imports: [
@@ -15,12 +17,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     }),
     TypeOrmModule.forRootAsync({
       useFactory(configService: ConfigService) {
-        console.log('Database Config:', {
-          host: configService.get('MYSQL_SERVER_HOST'),
-          port: configService.get('MYSQL_SERVER_PORT'),
-          username: configService.get('MYSQL_SERVER_USER'),
-          database: configService.get('MYSQL_SERVER_DB'),
-        });
         return {
           type: 'mysql',
           host: configService.get('MYSQL_SERVER_HOST'),
@@ -30,7 +26,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           database: configService.get('MYSQL_SERVER_DB'),
           synchronize: true,
           logging: true,
-          entities: [User],
+          entities: [User, Ledger],
           poolSize: 10,
           connectorPackage: 'mysql2',
           extra: {
@@ -48,6 +44,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       },
     }),
     UserModule,
+    LedgerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
